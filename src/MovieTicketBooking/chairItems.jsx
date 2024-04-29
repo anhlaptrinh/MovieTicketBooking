@@ -1,41 +1,60 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
+import { actSelectChair, actUnSelectChair } from "../store/action";
 
 class ChairItems extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      selectedCount: 0,
       checkedSeats: {},
-
     };
   }
-
+  
   handleSeatSelect = (event) => {
+    if (this.props.deleteclick) {
+      // Nếu deleteclick là true, không cho phép chọn hoặc hủy chọn ghế
+      return;
+    }
     const soGhe = event.target.value;
-    const { selectedCount, checkedSeats } = this.state;
-    const { numbchair } = this.props;
-
+    const { checkedSeats } = this.state;
+    const { numbchair,chaircount } = this.props;
     const updatedCheckedSeats = { ...checkedSeats };
-    let updatedSelectedCount = selectedCount; // Tạo bản sao của selectedCount
+    let updatedSelectedCount = chaircount; // Tạo bản sao của selectedCount
 
     // Kiểm tra xem số lượng ghế đã chọn có vượt quá hoặc bằng numbchair không
-    if (selectedCount >= numbchair) {
+    if (chaircount >= numbchair) {
         // Nếu vượt quá hoặc bằng numbchair, không cho phép chọn thêm ghế
         if (updatedCheckedSeats[soGhe]) {
             // Hủy chọn nếu ô đã được chọn trước đó
+            this.props.unSelectChair();
             updatedCheckedSeats[soGhe] = false;
-            updatedSelectedCount--; // Giảm selectedCount
+             updatedSelectedCount--; // Giảm selectedCount
         }
     } else {
         // Nếu chưa vượt quá numbchair, cho phép chọn thêm hoặc hủy chọn
+        // Nếu chưa vượt quá numbchair, cho phép chọn thêm hoặc hủy chọn
         updatedCheckedSeats[soGhe] = !updatedCheckedSeats[soGhe];
+        if(updatedCheckedSeats[soGhe]){
+          this.props.selectChair(soGhe);
+        } else {
+          this.props.unSelectChair();
+        }
         updatedSelectedCount += updatedCheckedSeats[soGhe] ? 1 : -1; // Tăng hoặc giảm selectedCount
     }
 
-    this.setState({ selectedCount: updatedSelectedCount, checkedSeats: updatedCheckedSeats },()=>{console.log(selectedCount);});
+    this.setState({ selectedCount: updatedSelectedCount, checkedSeats: updatedCheckedSeats },()=>{});
 };
+componentDidUpdate(prevProps) {
+  if (prevProps.listchairSelect !== this.props.listchairSelect) {
+    const updatedCheckedSeats = {};
 
+    this.props.getchair.forEach(chair => {
+      updatedCheckedSeats[chair.soGhe] = this.props.listchairSelect.includes(chair.soGhe);
+    });
+
+    this.setState({ checkedSeats: updatedCheckedSeats });
+  }
+}
   
   
 
@@ -56,7 +75,7 @@ class ChairItems extends Component {
                   <input
                     type="checkbox"
                     className="seats"
-                    disabled={ch.daDat}
+                    disabled={  ch.daDat }
                     value={ch.soGhe}
                     checked={checkedSeats[ch.soGhe] || false}
                     onChange={this.handleSeatSelect}
@@ -77,8 +96,22 @@ class ChairItems extends Component {
 const mapStateToProps = (state) => {
   return {
     numbchair: state.chairReducer.numberchair,
-    listchairSelect: state.chairReducer.listchairSelect
+    listchairSelect: state.chairReducer.listchairSelect,
+    chaircount: state.chairReducer.chaircount,
+    listchair: state.chairReducer.listchair
   };
 };
 
-export default connect(mapStateToProps, null)(ChairItems);
+const mapDispatchToProps=(dispatch)=>{
+  return{
+    selectChair: (soGhe)=>{
+      dispatch(actSelectChair(soGhe));
+    },
+    unSelectChair: ()=>{
+      dispatch(actUnSelectChair());
+    }
+  };
+};
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(ChairItems);
