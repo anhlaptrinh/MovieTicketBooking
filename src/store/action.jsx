@@ -26,10 +26,10 @@ const actSelectChair = (soGhe) => {
     }
 }
 
-const actUnSelectChair = () => {
+const actUnSelectChair = (soGhe) => {
     return {
         type: UNSELECT_CHAIR,
-        
+        payload: soGhe,
     }
 }
 const acrConFirm = () => {

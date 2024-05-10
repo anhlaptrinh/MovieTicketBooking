@@ -23,8 +23,11 @@ const chairReducer= (state = initialState, action) =>{
         listchairSelect: [...state.listchairSelect, action.payload],
       };
     case Actiontype.UNSELECT_CHAIR:
-      state.chaircount = state.chaircount - 1;
-      return { ...state };
+      return {
+        ...state,
+        chaircount: state.chaircount - 1,
+        listchairSelect: state.listchairSelect.filter(chair => chair !== action.payload),
+      };
     case Actiontype.CONFIRM_CHAIR:
         const updatedList = state.listchair.map(chair => {
             if (chair.hang !== "") {

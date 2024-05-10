@@ -26,35 +26,27 @@ class ChairItems extends Component {
         // Nếu vượt quá hoặc bằng numbchair, không cho phép chọn thêm ghế
         if (updatedCheckedSeats[soGhe]) {
             // Hủy chọn nếu ô đã được chọn trước đó
-            this.props.unSelectChair();
+            this.props.unSelectChair(soGhe);
             updatedCheckedSeats[soGhe] = false;
              updatedSelectedCount--; // Giảm selectedCount
         }
     } else {
         // Nếu chưa vượt quá numbchair, cho phép chọn thêm hoặc hủy chọn
-        // Nếu chưa vượt quá numbchair, cho phép chọn thêm hoặc hủy chọn
         updatedCheckedSeats[soGhe] = !updatedCheckedSeats[soGhe];
         if(updatedCheckedSeats[soGhe]){
+          updatedSelectedCount = updatedCheckedSeats[soGhe] +1 ;
           this.props.selectChair(soGhe);
         } else {
-          this.props.unSelectChair();
+          updatedSelectedCount = updatedCheckedSeats[soGhe]  -1;
+          this.props.unSelectChair(soGhe);
         }
-        updatedSelectedCount += updatedCheckedSeats[soGhe] ? 1 : -1; // Tăng hoặc giảm selectedCount
+         // Tăng hoặc giảm selectedCount
     }
 
     this.setState({ selectedCount: updatedSelectedCount, checkedSeats: updatedCheckedSeats },()=>{});
 };
-componentDidUpdate(prevProps) {
-  if (prevProps.listchairSelect !== this.props.listchairSelect) {
-    const updatedCheckedSeats = {};
 
-    this.props.getchair.forEach(chair => {
-      updatedCheckedSeats[chair.soGhe] = this.props.listchairSelect.includes(chair.soGhe);
-    });
 
-    this.setState({ checkedSeats: updatedCheckedSeats });
-  }
-}
   
   
 
@@ -107,8 +99,8 @@ const mapDispatchToProps=(dispatch)=>{
     selectChair: (soGhe)=>{
       dispatch(actSelectChair(soGhe));
     },
-    unSelectChair: ()=>{
-      dispatch(actUnSelectChair());
+    unSelectChair: (soGhe)=>{
+      dispatch(actUnSelectChair(soGhe));
     }
   };
 };
